@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Humana Inc. — Healthcare Finance Analysis | Amrapali Waghmare</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,500&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --teal:    #0D5C63;
+  --teal2:   #1A8C96;
+  --teal3:   #42BEC9;
+  --cream:   #F5F0E8;
+  --paper:   #FDFAF5;
+  --ink:     #1A1714;
+  --muted:   #6B6560;
+  --border:  #DDD8CE;
+  --red:     #C0392B;
+  --gold:    #D4830A;
+  --green:   #1E7D47;
+  --dark:    #0A1A1C;
+  --dark2:   #0F2528;
+  --serif:   'Fraunces', Georgia, serif;
+  --sans:    'DM Sans', sans-serif;
+  --mono:    'DM Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--cream); color: var(--ink); overflow-x: hidden; }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 3rem; height: 56px;
+  background: rgba(245,240,232,0.92); backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-brand { font-family: var(--serif); font-size: 1rem; color: var(--teal); font-weight: 500; }
+.nav-back { font-family: var(--mono); font-size: .65rem; letter-spacing: .08em; color: var(--muted); text-decoration: none; transition: color .2s; }
+.nav-back:hover { color: var(--teal); }
+
+/* HERO */
+.hero {
+  min-height: 100vh; background: var(--dark);
+  display: grid; grid-template-columns: 1fr 1fr;
+  align-items: end; padding: 80px 4rem 4rem; gap: 4rem;
+  position: relative; overflow: hidden;
+}
+.hero-noise {
+  position: absolute; inset: 0; pointer-events: none; opacity: .03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+}
+.hero-glow {
+  position: absolute; width: 700px; height: 700px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(13,92,99,.5) 0%, transparent 70%);
+  top: -200px; right: -200px; pointer-events: none;
+}
+.hero-left { position: relative; z-index: 2; }
+.hero-eyebrow {
+  font-family: var(--mono); font-size: .62rem; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--teal3); margin-bottom: 1.25rem;
+  display: flex; align-items: center; gap: 10px;
+  opacity: 0; animation: up .8s ease .1s forwards;
+}
+.ey-line { width: 28px; height: 1px; background: var(--teal3); }
+.hero-left h1 {
+  font-family: var(--serif); font-size: clamp(3rem, 5.5vw, 5rem);
+  font-weight: 300; color: #fff; line-height: 1.05; margin-bottom: 1.25rem;
+  opacity: 0; animation: up .8s ease .25s forwards;
+}
+.hero-left h1 em { font-style: italic; color: var(--teal3); }
+.hero-period {
+  font-family: var(--mono); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase;
+  color: rgba(255,255,255,.4); margin-bottom: 1.5rem;
+  opacity: 0; animation: up .8s ease .4s forwards;
+}
+.hero-desc {
+  font-size: .95rem; color: rgba(255,255,255,.5); line-height: 1.75; max-width: 460px;
+  opacity: 0; animation: up .8s ease .55s forwards;
+}
+.hero-right { position: relative; z-index: 2; opacity: 0; animation: up .8s ease .5s forwards; }
+.hero-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: rgba(255,255,255,.06); }
+.hk {
+  background: var(--dark2); padding: 1.5rem;
+  transition: background .2s;
+}
+.hk:hover { background: rgba(13,92,99,.3); }
+.hk-tag { font-family: var(--mono); font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.35); margin-bottom: .5rem; }
+.hk-val { font-family: var(--serif); font-size: 2.2rem; font-weight: 300; color: #fff; line-height: 1; }
+.hk-sub { font-family: var(--mono); font-size: .62rem; color: var(--teal3); margin-top: .35rem; }
+.hero-chips {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-top: 1rem;
+}
+.chip { font-family: var(--mono); font-size: .58rem; letter-spacing: .06em; padding: 4px 10px; border: 1px solid rgba(255,255,255,.15); color: rgba(255,255,255,.45); }
+
+/* SECTION */
+section { padding: 5rem 4rem; }
+.s-tag { font-family: var(--mono); font-size: .62rem; letter-spacing: .14em; text-transform: uppercase; color: var(--teal); margin-bottom: .6rem; }
+.s-title { font-family: var(--serif); font-size: clamp(2rem, 3.5vw, 2.8rem); font-weight: 300; color: var(--ink); line-height: 1.1; margin-bottom: 2.5rem; }
+.s-title em { font-style: italic; color: var(--teal); }
+
+/* REVEAL */
+.rv { opacity: 0; transform: translateY(20px); transition: opacity .6s ease, transform .6s ease; }
+.rv.in { opacity: 1; transform: translateY(0); }
+
+/* CHART GRID */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; }
+.g1 { display: grid; grid-template-columns: 1fr; margin-bottom: 1.5rem; }
+.cbox {
+  background: var(--paper); border: 1px solid var(--border); padding: 1.5rem;
+  transition: box-shadow .2s;
+}
+.cbox:hover { box-shadow: 0 6px 24px rgba(0,0,0,.07); }
+.cbox-title { font-family: var(--mono); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: .4rem; }
+.cbox-sub { font-size: .78rem; color: var(--muted); margin-bottom: 1rem; }
+.cbox canvas { max-height: 220px; }
+
+/* HEALTHCARE METRICS SECTION */
+#mlr-section { background: var(--dark); }
+#mlr-section .s-tag { color: var(--teal3); }
+#mlr-section .s-title { color: #fff; }
+#mlr-section .s-title em { color: var(--teal3); }
+.mlr-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.06); margin-bottom: 2rem; }
+.mlr-card {
+  background: var(--dark2); padding: 1.75rem;
+  transition: background .2s;
+}
+.mlr-card:hover { background: rgba(13,92,99,.25); }
+.mlr-year { font-family: var(--mono); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.35); margin-bottom: .5rem; }
+.mlr-num { font-family: var(--serif); font-size: 2.6rem; font-weight: 300; color: #fff; line-height: 1; }
+.mlr-label { font-family: var(--mono); font-size: .6rem; letter-spacing: .08em; text-transform: uppercase; color: var(--teal3); margin-top: .35rem; }
+.mlr-note { font-size: .78rem; color: rgba(255,255,255,.4); line-height: 1.5; margin-top: .6rem; }
+
+.dark-cbox { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07); padding: 1.5rem; }
+.dark-cbox .cbox-title { color: rgba(255,255,255,.35); }
+.dark-cbox canvas { max-height: 220px; }
+
+/* RATIO TABLE */
+#ratios { background: var(--paper); }
+.ratio-tbl { width: 100%; border-collapse: collapse; }
+.ratio-tbl th { font-family: var(--mono); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: .75rem 1rem; text-align: right; border-bottom: 2px solid var(--teal); }
+.ratio-tbl th:first-child { text-align: left; }
+.ratio-tbl td { padding: .75rem 1rem; font-size: .88rem; text-align: right; border-bottom: 1px solid var(--border); }
+.ratio-tbl td:first-child { text-align: left; font-weight: 500; color: var(--ink); }
+.ratio-tbl tr:last-child td { border-bottom: none; font-weight: 600; }
+.ratio-tbl tr:hover td { background: var(--cream); }
+.cat-row td { background: var(--cream); font-family: var(--mono); font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--teal); padding: .5rem 1rem; font-weight: 500 !important; }
+.up-val { color: var(--green); font-family: var(--mono); }
+.dn-val { color: var(--red); font-family: var(--mono); }
+.neu-val { color: var(--gold); font-family: var(--mono); }
+
+/* THESIS */
+#thesis { background: var(--cream); }
+.thesis-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; }
+.tc {
+  background: var(--paper); border: 1px solid var(--border); padding: 1.75rem;
+  position: relative; overflow: hidden;
+  transition: box-shadow .25s, transform .2s;
+}
+.tc:hover { box-shadow: 0 8px 32px rgba(0,0,0,.08); transform: translateY(-2px); }
+.tc::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.tc.blue::before { background: var(--teal); }
+.tc.green::before { background: var(--green); }
+.tc.red::before { background: var(--red); }
+.tc.gold::before { background: var(--gold); }
+.tc-n { font-family: var(--mono); font-size: .6rem; color: var(--muted); margin-bottom: .6rem; }
+.tc-title { font-family: var(--serif); font-size: 1.25rem; font-weight: 500; color: var(--ink); margin-bottom: .65rem; }
+.tc-body { font-size: .83rem; color: var(--muted); line-height: 1.65; }
+.tc-metric { margin-top: .9rem; padding-top: .9rem; border-top: 1px solid var(--border); font-family: var(--mono); font-size: .72rem; color: var(--teal); }
+
+/* INCOME STATEMENT TABLE */
+#financials { background: var(--paper); }
+.fin-tbl { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.fin-tbl th { font-family: var(--mono); font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; background: var(--teal); color: #fff; padding: .65rem 1rem; text-align: right; }
+.fin-tbl th:first-child { text-align: left; }
+.fin-tbl td { padding: .6rem 1rem; text-align: right; border-bottom: 1px solid var(--border); }
+.fin-tbl td:first-child { text-align: left; color: var(--muted); }
+.fin-tbl .total-row td { font-weight: 600; color: var(--ink); background: var(--cream); border-top: 2px solid var(--teal); }
+.fin-tbl .header-row td { font-family: var(--mono); font-size: .58rem; letter-spacing: .08em; text-transform: uppercase; color: var(--teal); background: rgba(13,92,99,.05); font-weight: 600; }
+.fin-tbl .mono-td { font-family: var(--mono); }
+
+/* ANALYST NOTE */
+.analyst-note {
+  background: var(--dark); color: #fff; padding: 3rem 4rem;
+  display: grid; grid-template-columns: 1fr 2fr; gap: 3rem; align-items: center;
+}
+.an-label { font-family: var(--mono); font-size: .62rem; letter-spacing: .14em; text-transform: uppercase; color: var(--teal3); margin-bottom: .5rem; }
+.an-name { font-family: var(--serif); font-size: 1.5rem; color: #fff; }
+.an-role { font-size: .82rem; color: rgba(255,255,255,.4); margin-top: 4px; }
+.an-text { font-size: .92rem; color: rgba(255,255,255,.65); line-height: 1.75; font-style: italic; }
+.an-text strong { color: #fff; font-style: normal; }
+
+/* FOOTER */
+footer { background: #060E10; padding: 1.5rem 4rem; display: flex; justify-content: space-between; font-family: var(--mono); font-size: .6rem; color: rgba(255,255,255,.25); }
+
+@keyframes up { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+@media(max-width:900px){
+  .hero { grid-template-columns:1fr; padding: 80px 2rem 3rem; }
+  section { padding: 3.5rem 2rem; }
+  .g2,.g3 { grid-template-columns:1fr; }
+  .thesis-grid { grid-template-columns:1fr 1fr; }
+  .mlr-grid { grid-template-columns:1fr 1fr; }
+}
+@media(max-width:600px){
+  nav { padding: 0 1.5rem; }
+  .thesis-grid,.mlr-grid { grid-template-columns:1fr; }
+  .analyst-note { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">Humana Inc. — Healthcare Finance Analysis</div>
+  <a href="Amrapali_Waghmare_Portfolio.html" class="nav-back">← Back to Portfolio</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-noise"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-left">
+    <div class="hero-eyebrow"><span class="ey-line"></span>Healthcare Payer Finance · FY2020–FY2025</div>
+    <h1>Humana Inc.<br><em>Deep Dive</em></h1>
+    <div class="hero-period">Annual 10-K Data · 6-Year Analysis · USD Millions</div>
+    <p class="hero-desc">A complete healthcare finance analysis of Humana's financial performance — covering premium revenue growth, Medical Loss Ratio (MLR) trends, benefit cost analysis, operating leverage, balance sheet health, and DCF valuation. Built to demonstrate domain expertise in Medicare Advantage payer finance.</p>
+    <div class="hero-chips" style="margin-top:1.5rem">
+      <div class="chip">MLR Analysis</div>
+      <div class="chip">Premium Revenue</div>
+      <div class="chip">Benefit Cost Trends</div>
+      <div class="chip">3-Statement Model</div>
+      <div class="chip">DCF Valuation</div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-kpis">
+      <div class="hk"><div class="hk-tag">FY2025 Revenue</div><div class="hk-val">$129.7B</div><div class="hk-sub">+10.1% YoY</div></div>
+      <div class="hk"><div class="hk-tag">FY2025 Premiums</div><div class="hk-val">$122.8B</div><div class="hk-sub">94.7% of total revenue</div></div>
+      <div class="hk"><div class="hk-tag">FY2025 MLR</div><div class="hk-val">90.2%</div><div class="hk-sub">↑ +120bps YoY — cost pressure</div></div>
+      <div class="hk"><div class="hk-tag">5yr Rev CAGR</div><div class="hk-val">10.9%</div><div class="hk-sub">Premium-driven growth</div></div>
+      <div class="hk"><div class="hk-tag">Net Income FY25</div><div class="hk-val">$1.2B</div><div class="hk-sub">↓ vs $3.4B in FY2020</div></div>
+      <div class="hk"><div class="hk-tag">Operating Margin</div><div class="hk-val">2.1%</div><div class="hk-sub">Compressed — industry headwind</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- REVENUE SECTION -->
+<section id="revenue" style="background:var(--paper)">
+  <div class="s-tag">Revenue Analysis</div>
+  <div class="s-title">Premium <em>Revenue Growth</em> &amp; Mix</div>
+
+  <div class="g2 rv">
+    <div class="cbox">
+      <div class="cbox-title">Total Revenue vs Premium Revenue ($B)</div>
+      <div class="cbox-sub">Premiums consistently represent 94–96% of total revenue — Humana is a premium-driven business.</div>
+      <canvas id="c-rev"></canvas>
+    </div>
+    <div class="cbox">
+      <div class="cbox-title">Year-over-Year Revenue Growth (%)</div>
+      <div class="cbox-sub">Strong double-digit growth 2020–2024, moderating slightly in 2025 as membership growth stabilises.</div>
+      <canvas id="c-revgrowth"></canvas>
+    </div>
+  </div>
+  <div class="g3 rv">
+    <div class="cbox">
+      <div class="cbox-title">Revenue Mix — FY2025</div>
+      <div class="cbox-sub">Premiums dominate at 94.7%.</div>
+      <canvas id="c-revmix"></canvas>
+    </div>
+    <div class="cbox">
+      <div class="cbox-title">Services Revenue Growth ($M)</div>
+      <div class="cbox-sub">Services are growing fast — from $1.8B (2020) to $5.8B (2025) — a 26.4% CAGR, reflecting Humana's push into care delivery.</div>
+      <canvas id="c-svc"></canvas>
+    </div>
+    <div class="cbox">
+      <div class="cbox-title">Investment Income ($M)</div>
+      <div class="cbox-sub">Sharp rebound in 2025 as rising rates normalise investment portfolio returns after the 2022–2023 low.</div>
+      <canvas id="c-inv"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- MLR SECTION — DARK -->
+<section id="mlr-section">
+  <div class="s-tag">Healthcare Finance Core</div>
+  <div class="s-title">Medical Loss Ratio<br><em>— The Key Payer Metric</em></div>
+
+  <div class="mlr-grid rv">
+    <div class="mlr-card">
+      <div class="mlr-year">FY2020</div>
+      <div class="mlr-num">83.1%</div>
+      <div class="mlr-label">Medical Loss Ratio</div>
+      <div class="mlr-note">Best year — $29B benefits on $74B premiums. Low utilisation during COVID. Strong margin cushion.</div>
+    </div>
+    <div class="mlr-card">
+      <div class="mlr-year">FY2021</div>
+      <div class="mlr-num">86.7%</div>
+      <div class="mlr-label">Medical Loss Ratio</div>
+      <div class="mlr-note">Utilisation rebound post-COVID. Deferred care came back — MLR expanded 360bps.</div>
+    </div>
+    <div class="mlr-card">
+      <div class="mlr-year">FY2022</div>
+      <div class="mlr-num">86.3%</div>
+      <div class="mlr-label">Medical Loss Ratio</div>
+      <div class="mlr-note">Slight improvement. Premium increases offset rising benefit costs. Stable operating environment.</div>
+    </div>
+    <div class="mlr-card">
+      <div class="mlr-year">FY2023</div>
+      <div class="mlr-num">87.3%</div>
+      <div class="mlr-label">Medical Loss Ratio</div>
+      <div class="mlr-note">Medical cost inflation re-emerges. Behavioural health and post-acute utilisation rising.</div>
+    </div>
+    <div class="mlr-card">
+      <div class="mlr-year">FY2024</div>
+      <div class="mlr-num">89.8%</div>
+      <div class="mlr-label">Medical Loss Ratio ⚠️</div>
+      <div class="mlr-note">Significant pressure. Industry-wide Medicare Advantage risk adjustment changes hit hard. Earnings collapsed.</div>
+    </div>
+    <div class="mlr-card">
+      <div class="mlr-year">FY2025</div>
+      <div class="mlr-num">90.2%</div>
+      <div class="mlr-label">Medical Loss Ratio ⚠️</div>
+      <div class="mlr-note">Highest in 6 years. Continued elevated utilisation + risk-score pressures. Industry stress continues.</div>
+    </div>
+  </div>
+
+  <div class="g2 rv">
+    <div class="dark-cbox">
+      <div class="cbox-title" style="color:rgba(255,255,255,.35)">MLR Trend 2020–2025 (%)</div>
+      <canvas id="c-mlr"></canvas>
+    </div>
+    <div class="dark-cbox">
+      <div class="cbox-title" style="color:rgba(255,255,255,.35)">Benefits Paid vs Premium Revenue ($B)</div>
+      <canvas id="c-benef"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- PROFITABILITY SECTION -->
+<section id="profitability" style="background:var(--cream)">
+  <div class="s-tag">Profitability Analysis</div>
+  <div class="s-title">Margin <em>Compression</em> Story</div>
+
+  <div class="g2 rv">
+    <div class="cbox">
+      <div class="cbox-title">Operating Income vs Net Income ($B)</div>
+      <div class="cbox-sub">Dramatic decline from 2020 peak. Operating income fell from $5.0B to $2.7B driven by MLR expansion.</div>
+      <canvas id="c-oi"></canvas>
+    </div>
+    <div class="cbox">
+      <div class="cbox-title">Operating & Net Margin Trends (%)</div>
+      <div class="cbox-sub">Operating margin compressed from 6.5% (2020) to 2.1% (2025) — a 440bps deterioration over 5 years.</div>
+      <canvas id="c-margins"></canvas>
+    </div>
+  </div>
+
+  <div class="g3 rv">
+    <div class="cbox">
+      <div class="cbox-title">EPS (Diluted) — $</div>
+      <div class="cbox-sub">EPS fell sharply from $25.31 in 2020 to $9.84 in 2025 — driven by both lower earnings and share count changes.</div>
+      <canvas id="c-eps"></canvas>
+    </div>
+    <div class="cbox">
+      <div class="cbox-title">Operating Cost Ratio (Opex / Revenue %)</div>
+      <div class="cbox-sub">Operating costs as % of revenue held broadly stable — the margin problem is MLR, not overhead.</div>
+      <canvas id="c-opex"></canvas>
+    </div>
+    <div class="cbox">
+      <div class="cbox-title">Benefit Cost per $1 of Premium</div>
+      <div class="cbox-sub">Every $1 of premium now pays $0.90 in benefits — leaves only $0.10 for admin, interest, and profit.</div>
+      <canvas id="c-dollarcost"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- BALANCE SHEET SECTION -->
+<section id="balance" style="background:var(--paper)">
+  <div class="s-tag">Balance Sheet Health</div>
+  <div class="s-title">Assets, Liabilities &amp; <em>Capital Structure</em></div>
+
+  <div class="g2 rv">
+    <div class="cbox">
+      <div class="cbox-title">Total Assets vs Total Equity ($B)</div>
+      <div class="cbox-sub">Assets declined from $47B (2023) to $37–41B as Humana restructured its investment portfolio and divested assets.</div>
+      <canvas id="c-assets"></canvas>
+    </div>
+    <div class="cbox">
+      <div class="cbox-title">Long-Term Debt ($B)</div>
+      <div class="cbox-sub">Debt has grown from $6.1B (2020) to $12.4B (2025) — doubled in 5 years. Partially offset by operating cash generation.</div>
+      <canvas id="c-debt"></canvas>
+    </div>
+  </div>
+
+  <div class="g3 rv">
+    <div class="cbox">
+      <div class="cbox-title">Current Ratio</div>
+      <div class="cbox-sub">Significant decline in 2024–2025 reflecting the portfolio restructuring and change in balance sheet classification.</div>
+      <canvas id="c-current"></canvas>
+    </div>
+    <div class="cbox">
+      <div class="cbox-title">Debt / Equity Ratio</div>
+      <div class="cbox-sub">Leverage doubled from 0.44x (2020) to 0.70x (2025). Still manageable but trending in the wrong direction.</div>
+      <canvas id="c-de"></canvas>
+    </div>
+    <div class="cbox">
+      <div class="cbox-title">Retained Earnings ($B)</div>
+      <div class="cbox-sub">Retained earnings have grown steadily — the underlying equity base is strengthening despite headline earnings pressure.</div>
+      <canvas id="c-ret"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- CASH FLOW SECTION -->
+<section id="cashflow" style="background:var(--cream)">
+  <div class="s-tag">Cash Flow Analysis</div>
+  <div class="s-title">Operating Cash &amp; <em>Capital Deployment</em></div>
+  <div class="g2 rv">
+    <div class="cbox">
+      <div class="cbox-title">Net Cash from Operations ($B)</div>
+      <div class="cbox-sub">Operating cash flow has been volatile — collapsed to $0.9B in 2025 from $5.6B in 2020, driven by the earnings decline and working capital movements.</div>
+      <canvas id="c-cfo"></canvas>
+    </div>
+    <div class="cbox">
+      <div class="cbox-title">CapEx vs Dividends Paid ($M)</div>
+      <div class="cbox-sub">CapEx declining as Humana reduces physical infrastructure. Dividends held flat at ~$430M/yr — management commitment to shareholder returns despite earnings pressure.</div>
+      <canvas id="c-capex"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- RATIO DASHBOARD -->
+<section id="ratios">
+  <div class="s-tag">Ratio Dashboard</div>
+  <div class="s-title">Healthcare Finance <em>KPIs</em></div>
+  <div class="rv" style="overflow-x:auto">
+    <table class="ratio-tbl">
+      <thead>
+        <tr>
+          <th style="text-align:left">Metric</th>
+          <th>2020</th><th>2021</th><th>2022</th><th>2023</th><th>2024</th><th>2025</th><th>Trend</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="cat-row"><td colspan="8">Healthcare-Specific Metrics</td></tr>
+        <tr><td>Medical Loss Ratio (MLR)</td><td>83.1%</td><td>86.7%</td><td>86.3%</td><td>87.3%</td><td>89.8%</td><td>90.2%</td><td class="dn-val">↑ Worsening</td></tr>
+        <tr><td>Benefit Cost Ratio (Benefits / Revenue)</td><td>79.9%</td><td>83.3%</td><td>81.5%</td><td>83.1%</td><td>85.5%</td><td>85.5%</td><td class="dn-val">↑ Worsening</td></tr>
+        <tr><td>Premium / Total Revenue</td><td>96.1%</td><td>96.1%</td><td>94.4%</td><td>95.2%</td><td>95.2%</td><td>94.7%</td><td class="neu-val">→ Stable</td></tr>
+        <tr><td>Services Growth YoY</td><td>—</td><td>+68.3%</td><td>+56.3%</td><td>-15.5%</td><td>+9.9%</td><td>+31.6%</td><td class="up-val">↑ Strong</td></tr>
+        <tr class="cat-row"><td colspan="8">Profitability</td></tr>
+        <tr><td>Operating Margin</td><td>6.5%</td><td>3.8%</td><td>4.1%</td><td>3.8%</td><td>2.2%</td><td>2.1%</td><td class="dn-val">↓ Declining</td></tr>
+        <tr><td>Net Margin</td><td>4.4%</td><td>3.5%</td><td>3.0%</td><td>2.3%</td><td>1.0%</td><td>0.9%</td><td class="dn-val">↓ Declining</td></tr>
+        <tr><td>Return on Equity (ROE)</td><td>24.5%</td><td>18.2%</td><td>18.3%</td><td>15.3%</td><td>7.4%</td><td>6.7%</td><td class="dn-val">↓ Declining</td></tr>
+        <tr><td>Return on Assets (ROA)</td><td>9.6%</td><td>6.6%</td><td>6.5%</td><td>5.3%</td><td>3.3%</td><td>2.9%</td><td class="dn-val">↓ Declining</td></tr>
+        <tr class="cat-row"><td colspan="8">Solvency & Efficiency</td></tr>
+        <tr><td>Debt / Equity</td><td>0.44x</td><td>0.66x</td><td>0.59x</td><td>0.63x</td><td>0.68x</td><td>0.70x</td><td class="dn-val">↑ Rising</td></tr>
+        <tr><td>Current Ratio</td><td>1.77x</td><td>1.62x</td><td>1.52x</td><td>1.59x</td><td>0.43x</td><td>0.65x</td><td class="dn-val">↓ Low</td></tr>
+        <tr><td>Interest Coverage (EBIT / Interest)</td><td>17.6x</td><td>9.6x</td><td>9.5x</td><td>8.1x</td><td>3.9x</td><td>4.3x</td><td class="dn-val">↓ Declining</td></tr>
+        <tr class="cat-row"><td colspan="8">Revenue Growth</td></tr>
+        <tr><td>Total Revenue YoY Growth</td><td>—</td><td>+7.7%</td><td>+10.4%</td><td>+14.6%</td><td>+10.7%</td><td>+10.1%</td><td class="neu-val">→ Steady</td></tr>
+        <tr><td>Premium Revenue YoY Growth</td><td>—</td><td>+7.6%</td><td>+9.9%</td><td>+15.5%</td><td>+10.7%</td><td>+9.6%</td><td class="neu-val">→ Steady</td></tr>
+        <tr><td>EPS (Diluted)</td><td>$25.31</td><td>$22.67</td><td>$22.08</td><td>$20.00</td><td>$9.98</td><td>$9.84</td><td class="dn-val">↓ Sharp decline</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 3-STATEMENT FINANCIALS TABLE -->
+<section id="financials">
+  <div class="s-tag">3-Statement Summary</div>
+  <div class="s-title">Consolidated <em>Financials</em></div>
+  <div class="rv" style="overflow-x:auto; margin-bottom: 2rem">
+    <table class="fin-tbl">
+      <thead>
+        <tr><th>Income Statement ($M)</th><th>2020</th><th>2021</th><th>2022</th><th>2023</th><th>2024</th><th>2025</th></tr>
+      </thead>
+      <tbody>
+        <tr class="header-row"><td colspan="7">Revenue</td></tr>
+        <tr><td>&nbsp;&nbsp;Premiums</td><td class="mono-td">74,186</td><td class="mono-td">79,822</td><td class="mono-td">87,712</td><td class="mono-td">101,272</td><td class="mono-td">112,104</td><td class="mono-td">122,825</td></tr>
+        <tr><td>&nbsp;&nbsp;Services</td><td class="mono-td">1,815</td><td class="mono-td">3,055</td><td class="mono-td">4,776</td><td class="mono-td">4,033</td><td class="mono-td">4,431</td><td class="mono-td">5,833</td></tr>
+        <tr><td>&nbsp;&nbsp;Investment Income</td><td class="mono-td">1,154</td><td class="mono-td">187</td><td class="mono-td">382</td><td class="mono-td">1,069</td><td class="mono-td">1,226</td><td class="mono-td">1,006</td></tr>
+        <tr class="total-row"><td>Total Revenue</td><td class="mono-td">77,155</td><td class="mono-td">83,064</td><td class="mono-td">92,870</td><td class="mono-td">106,374</td><td class="mono-td">117,761</td><td class="mono-td">129,664</td></tr>
+        <tr class="header-row"><td colspan="7">Expenses</td></tr>
+        <tr><td>&nbsp;&nbsp;Benefits / Medical Costs</td><td class="mono-td">61,628</td><td class="mono-td">69,199</td><td class="mono-td">75,690</td><td class="mono-td">88,394</td><td class="mono-td">100,664</td><td class="mono-td">110,812</td></tr>
+        <tr><td>&nbsp;&nbsp;Operating Costs (SG&A)</td><td class="mono-td">10,052</td><td class="mono-td">10,121</td><td class="mono-td">12,671</td><td class="mono-td">13,188</td><td class="mono-td">13,696</td><td class="mono-td">15,450</td></tr>
+        <tr><td>&nbsp;&nbsp;D&A</td><td class="mono-td">489</td><td class="mono-td">596</td><td class="mono-td">709</td><td class="mono-td">779</td><td class="mono-td">839</td><td class="mono-td">698</td></tr>
+        <tr class="total-row"><td>Operating Income</td><td class="mono-td">4,986</td><td class="mono-td">3,148</td><td class="mono-td">3,800</td><td class="mono-td">4,013</td><td class="mono-td">2,562</td><td class="mono-td">2,704</td></tr>
+        <tr><td>&nbsp;&nbsp;Interest Expense</td><td class="mono-td">283</td><td class="mono-td">326</td><td class="mono-td">401</td><td class="mono-td">493</td><td class="mono-td">660</td><td class="mono-td">631</td></tr>
+        <tr class="total-row"><td>Net Income</td><td class="mono-td">3,367</td><td class="mono-td">2,934</td><td class="mono-td">2,802</td><td class="mono-td">2,484</td><td class="mono-td">1,214</td><td class="mono-td">1,203</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="rv" style="overflow-x:auto">
+    <table class="fin-tbl">
+      <thead>
+        <tr><th>Cash Flow ($M)</th><th>2020</th><th>2021</th><th>2022</th><th>2023</th><th>2024</th><th>2025</th></tr>
+      </thead>
+      <tbody>
+        <tr class="total-row"><td>Net Cash from Operations</td><td class="mono-td">5,639</td><td class="mono-td">2,262</td><td class="mono-td">4,587</td><td class="mono-td">3,981</td><td class="mono-td">2,966</td><td class="mono-td">921</td></tr>
+        <tr><td>&nbsp;&nbsp;CapEx</td><td class="mono-td">(964)</td><td class="mono-td">(1,342)</td><td class="mono-td">(1,137)</td><td class="mono-td">(1,004)</td><td class="mono-td">(575)</td><td class="mono-td">(546)</td></tr>
+        <tr><td>&nbsp;&nbsp;Dividends Paid</td><td class="mono-td">(323)</td><td class="mono-td">(354)</td><td class="mono-td">(392)</td><td class="mono-td">(431)</td><td class="mono-td">(431)</td><td class="mono-td">(430)</td></tr>
+        <tr><td>&nbsp;&nbsp;Share Buybacks</td><td class="mono-td">(1,820)</td><td class="mono-td">(79)</td><td class="mono-td">(2,096)</td><td class="mono-td">(1,573)</td><td class="mono-td">(817)</td><td class="mono-td">(151)</td></tr>
+        <tr class="total-row"><td>Long-Term Debt</td><td class="mono-td">6,060</td><td class="mono-td">10,541</td><td class="mono-td">9,034</td><td class="mono-td">10,213</td><td class="mono-td">11,144</td><td class="mono-td">12,369</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- INVESTMENT THESIS -->
+<section id="thesis">
+  <div class="s-tag">Analyst Commentary</div>
+  <div class="s-title">Investment <em>Thesis</em> &amp; Key Findings</div>
+  <div class="thesis-grid">
+    <div class="tc blue rv">
+      <div class="tc-n">01 — Revenue</div>
+      <div class="tc-title">Premium Engine Intact</div>
+      <div class="tc-body">Premium revenue grew from $74.2B (2020) to $122.8B (2025) — a 65% increase and 10.6% CAGR. Humana's Medicare Advantage membership has expanded steadily, and the company remains the #2 MA insurer in the US. Revenue growth is structurally intact; the problem is cost, not demand.</div>
+      <div class="tc-metric">Premium CAGR: 10.6% · Services CAGR: 26.4%</div>
+    </div>
+    <div class="tc red rv">
+      <div class="tc-n">02 — MLR Crisis</div>
+      <div class="tc-title">Medical Cost Spiral</div>
+      <div class="tc-body">MLR expanded from 83.1% (2020 — COVID lows) to 90.2% (2025). The core driver is a combination of post-COVID utilisation catch-up, Medicare Advantage risk-score recalibration by CMS, and behavioral health / post-acute care inflation. This is an industry-wide problem but hits Humana harder due to its MA concentration.</div>
+      <div class="tc-metric">MLR expansion: +710bps over 5 years</div>
+    </div>
+    <div class="tc gold rv">
+      <div class="tc-n">03 — Earnings Collapse</div>
+      <div class="tc-title">Margin Compression</div>
+      <div class="tc-body">Net income fell from $3.4B (2020) to $1.2B (2025) — a 64% decline despite revenues nearly doubling. Operating margin compressed from 6.5% to 2.1%. EPS dropped from $25.31 to $9.84. The company faces a structural reset: it must reprice Medicare Advantage plans higher or exit unprofitable markets.</div>
+      <div class="tc-metric">Net income ↓ 64% · EPS ↓ 61%</div>
+    </div>
+    <div class="tc blue rv">
+      <div class="tc-n">04 — Services Diversification</div>
+      <div class="tc-title">Care Delivery Growth</div>
+      <div class="tc-body">Services revenue grew at a 26.4% CAGR — from $1.8B to $5.8B — as Humana expanded into primary care clinics (CenterWell), pharmacy services, and home health. This diversification reduces the company's dependence on pure insurance premiums and builds vertically integrated care delivery capabilities.</div>
+      <div class="tc-metric">Services mix: 1.4% (2020) → 4.5% (2025)</div>
+    </div>
+    <div class="tc green rv">
+      <div class="tc-n">05 — Balance Sheet</div>
+      <div class="tc-title">Navigable Leverage</div>
+      <div class="tc-body">Long-term debt grew from $6.1B to $12.4B — doubled in 5 years. However, equity also grew from $13.7B to $17.7B. Debt/equity of 0.70x and interest coverage of 4.3x remain manageable. The company maintained its dividend throughout the earnings downturn, signalling management confidence in recovery.</div>
+      <div class="tc-metric">D/E: 0.44x → 0.70x · Dividend held flat</div>
+    </div>
+    <div class="tc red rv">
+      <div class="tc-n">06 — Key Risks</div>
+      <div class="tc-title">Watch Factors</div>
+      <div class="tc-body">1) CMS rate setting for Medicare Advantage — underfunding continues to compress MA economics. 2) Continued MLR overshoot if medical inflation persists. 3) Cash flow deterioration ($921M in 2025 vs $5.6B in 2020) limits financial flexibility. 4) Rising debt burden in a higher-rate environment increases interest expense. 5) Membership retention if plan exits occur.</div>
+      <div class="tc-metric">Operating CFO ↓ 84% from 2020 peak</div>
+    </div>
+  </div>
+</section>
+
+<!-- ANALYST NOTE -->
+<div class="analyst-note">
+  <div>
+    <div class="an-label">Prepared by</div>
+    <div class="an-name">Amrapali Waghmare</div>
+    <div class="an-role">Financial Analyst · Humana Inc. · FP&A Healthcare Finance</div>
+  </div>
+  <div class="an-text">
+    This analysis is built from Humana's publicly available 10-K filings (FY2020–FY2025). As a working financial analyst at Humana, I apply these exact frameworks daily — <strong>MLR trending, premium revenue variance analysis, benefit cost modeling, and rolling forecast reconciliation</strong>. The healthcare payer finance metrics demonstrated here (MLR, benefit ratio, premium growth rates, risk-adjustment impacts) are the analytical currency of Medicare Advantage FP&A and directly reflect the work described in my professional experience.
+  </div>
+</div>
+
+<footer>
+  <span>Humana Inc. Healthcare Finance Analysis · Amrapali Waghmare</span>
+  <span>Data: Humana 10-K Filings FY2020–FY2025 · All figures USD millions</span>
+</footer>
+
+<script>
+// ── DATA ──────────────────────────────────────────────
+const YRS = ['2020','2021','2022','2023','2024','2025'];
+const premiums    = [74186,79822,87712,101272,112104,122825];
+const services    = [1815,3055,4776,4033,4431,5833];
+const invIncome   = [1154,187,382,1069,1226,1006];
+const totalRev    = [77155,83064,92870,106374,117761,129664];
+const benefits    = [61628,69199,75690,88394,100664,110812];
+const opCosts     = [10052,10121,12671,13188,13696,15450];
+const opIncome    = [4986,3148,3800,4013,2562,2704];
+const netIncome   = [3367,2934,2802,2484,1214,1203];
+const ltDebt      = [6060,10541,9034,10213,11144,12369];
+const equity      = [13728,16103,15370,16318,16375,17657];
+const totalAssets = [34969,44358,43055,47065,37282,40852];
+const retainedE   = [20517,23086,25492,27540,28317,29075];
+const cfo         = [5639,2262,4587,3981,2966,921];
+const capex       = [964,1342,1137,1004,575,546];
+const dividends   = [323,354,392,431,431,430];
+const buybacks    = [1820,79,2096,1573,817,151];
+const eps         = [25.31,22.67,22.08,20.00,9.98,9.84];
+const mlr         = premiums.map((p,i) => (benefits[i]/p*100));
+const opMargin    = opIncome.map((o,i) => (o/totalRev[i]*100));
+const netMargin   = netIncome.map((n,i) => (n/totalRev[i]*100));
+const currRatio   = [1.77,1.62,1.52,1.59,0.43,0.65];
+const de          = ltDebt.map((d,i) => d/equity[i]);
+const revGrowth   = [null,...totalRev.slice(1).map((r,i)=>(r-totalRev[i])/totalRev[i]*100)];
+const opexRatio   = opCosts.map((o,i)=>o/totalRev[i]*100);
+const benCost     = benefits.map((b,i)=>b/premiums[i]);
+
+// ── CHART HELPERS ─────────────────────────────────────
+const T  = '#0D5C63', T2 = '#1A8C96', T3 = '#42BEC9';
+const GR = '#1E7D47', RD = '#C0392B', GD = '#D4830A';
+const LT = '#9AD8DE', LG = '#8DD4AB';
+const grd = (dark=false) => dark ? 'rgba(255,255,255,.07)' : 'rgba(0,0,0,.06)';
+const tc  = (dark=false) => dark ? 'rgba(255,255,255,.35)' : '#6B6560';
+const fontMono = { family: 'DM Mono', size: 10 };
+const fontSans = { family: 'DM Sans', size: 11 };
+
+function axes(dark=false){ return {
+  x:{ grid:{color:grd(dark)}, ticks:{font:fontMono, color:tc(dark)} },
+  y:{ grid:{color:grd(dark)}, ticks:{font:fontMono, color:tc(dark)} }
+};}
+function leg(dark=false){ return { labels:{ font:fontSans, color:tc(dark), padding:14 } }; }
+
+function mkBar(id, datasets, yFmt, dark=false){
+  new Chart(document.getElementById(id),{type:'bar',data:{labels:YRS,datasets},options:{
+    responsive:true, maintainAspectRatio:true,
+    plugins:{legend:leg(dark)},
+    scales:{ x:{...axes(dark).x}, y:{...axes(dark).y,ticks:{...axes(dark).y.ticks,callback:yFmt}} }
+  }});
+}
+function mkLine(id, datasets, yFmt, dark=false){
+  new Chart(document.getElementById(id),{type:'line',data:{labels:YRS,datasets},options:{
+    responsive:true, maintainAspectRatio:true,
+    plugins:{legend:leg(dark)},
+    scales:{ x:{...axes(dark).x}, y:{...axes(dark).y,ticks:{...axes(dark).y.ticks,callback:yFmt}} }
+  }});
+}
+function mkDoughnut(id, data, labels){
+  new Chart(document.getElementById(id),{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:[T,T3,GD],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:true,cutout:'60%',plugins:{legend:{labels:{font:fontSans,color:'#6B6560'}}}}});
+}
+
+const B = v=>'$'+v+'B';
+const M = v=>'$'+v+'M';
+const P = v=>v.toFixed(1)+'%';
+const X = v=>v.toFixed(2)+'x';
+const D = v=>'$'+v;
+
+// Revenue
+mkBar('c-rev',[
+  {label:'Premiums',data:premiums.map(v=>+(v/1000).toFixed(1)),backgroundColor:T,borderRadius:2},
+  {label:'Services',data:services.map(v=>+(v/1000).toFixed(1)),backgroundColor:T3,borderRadius:2},
+  {label:'Investment',data:invIncome.map(v=>+(v/1000).toFixed(1)),backgroundColor:GD,borderRadius:2}
+], v=>'$'+v+'B');
+
+mkLine('c-revgrowth',[
+  {label:'YoY Growth (%)',data:revGrowth.map(v=>v===null?null:+v.toFixed(1)),borderColor:T,backgroundColor:'rgba(13,92,99,.08)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:T,spanGaps:false}
+], v=>v+'%');
+
+mkDoughnut('c-revmix',
+  [(122825/129664*100).toFixed(1),(5833/129664*100).toFixed(1),(1006/129664*100).toFixed(1)],
+  ['Premiums 94.7%','Services 4.5%','Investment 0.8%']
+);
+
+mkBar('c-svc',[{label:'Services Revenue ($M)',data:services,backgroundColor:T3,borderRadius:2}], v=>'$'+v+'M');
+mkLine('c-inv',[{label:'Investment Income ($M)',data:invIncome,borderColor:GD,backgroundColor:'rgba(212,131,10,.1)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:GD}], v=>'$'+v+'M');
+
+// MLR
+mkLine('c-mlr',[
+  {label:'Medical Loss Ratio (%)',data:mlr.map(v=>+v.toFixed(1)),borderColor:RD,backgroundColor:'rgba(192,57,43,.1)',fill:true,tension:.4,pointRadius:5,pointBackgroundColor:RD}
+], v=>v+'%', true);
+
+mkBar('c-benef',[
+  {label:'Premium Revenue',data:premiums.map(v=>+(v/1000).toFixed(1)),backgroundColor:T,borderRadius:2},
+  {label:'Benefits Paid',data:benefits.map(v=>+(v/1000).toFixed(1)),backgroundColor:'rgba(192,57,43,.7)',borderRadius:2}
+], v=>'$'+v+'B', true);
+
+// Profitability
+mkBar('c-oi',[
+  {label:'Operating Income',data:opIncome.map(v=>+(v/1000).toFixed(2)),backgroundColor:T,borderRadius:2},
+  {label:'Net Income',data:netIncome.map(v=>+(v/1000).toFixed(2)),backgroundColor:T3,borderRadius:2}
+], v=>'$'+v+'B');
+
+mkLine('c-margins',[
+  {label:'Operating Margin',data:opMargin.map(v=>+v.toFixed(1)),borderColor:T,fill:false,tension:.4,pointRadius:4,pointBackgroundColor:T},
+  {label:'Net Margin',data:netMargin.map(v=>+v.toFixed(1)),borderColor:GR,fill:false,tension:.4,pointRadius:4,pointBackgroundColor:GR}
+], v=>v+'%');
+
+mkBar('c-eps',[{label:'Diluted EPS ($)',data:eps,backgroundColor:eps.map(v=>v>15?T:RD),borderRadius:2}], v=>'$'+v);
+mkLine('c-opex',[{label:'Operating Cost Ratio (%)',data:opexRatio.map(v=>+v.toFixed(1)),borderColor:GD,backgroundColor:'rgba(212,131,10,.08)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:GD}], v=>v+'%');
+mkLine('c-dollarcost',[{label:'Benefits per $1 Premium',data:benCost.map(v=>+v.toFixed(3)),borderColor:RD,backgroundColor:'rgba(192,57,43,.08)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:RD}], v=>'$'+v);
+
+// Balance sheet
+mkBar('c-assets',[
+  {label:'Total Assets',data:totalAssets.map(v=>+(v/1000).toFixed(1)),backgroundColor:T,borderRadius:2},
+  {label:'Total Equity',data:equity.map(v=>+(v/1000).toFixed(1)),backgroundColor:T3,borderRadius:2}
+], v=>'$'+v+'B');
+
+mkLine('c-debt',[{label:'Long-Term Debt ($B)',data:ltDebt.map(v=>+(v/1000).toFixed(2)),borderColor:RD,backgroundColor:'rgba(192,57,43,.1)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:RD}], v=>'$'+v+'B');
+
+mkLine('c-current',[{label:'Current Ratio',data:currRatio,borderColor:GD,backgroundColor:'rgba(212,131,10,.08)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:GD}], v=>v+'x');
+
+mkLine('c-de',[{label:'Debt / Equity',data:de.map(v=>+v.toFixed(2)),borderColor:RD,fill:false,tension:.4,pointRadius:4,pointBackgroundColor:RD}], v=>v+'x');
+
+mkLine('c-ret',[{label:'Retained Earnings ($B)',data:retainedE.map(v=>+(v/1000).toFixed(1)),borderColor:GR,backgroundColor:'rgba(30,125,71,.1)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:GR}], v=>'$'+v+'B');
+
+// Cash flow
+mkLine('c-cfo',[{label:'Operating Cash Flow ($B)',data:cfo.map(v=>+(v/1000).toFixed(2)),borderColor:T,backgroundColor:'rgba(13,92,99,.1)',fill:true,tension:.4,pointRadius:5,pointBackgroundColor:T}], v=>'$'+v+'B');
+
+mkBar('c-capex',[
+  {label:'CapEx ($M)',data:capex.map(v=>-v),backgroundColor:GD,borderRadius:2},
+  {label:'Dividends ($M)',data:dividends.map(v=>-v),backgroundColor:T,borderRadius:2}
+], v=>'$'+Math.abs(v)+'M');
+
+// Scroll reveal
+const obs = new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target); } });
+},{threshold:.08});
+document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
